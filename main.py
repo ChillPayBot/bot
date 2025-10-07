@@ -3,9 +3,9 @@ import logging
 import sys
 
 from dotenv import load_dotenv
-
 from bot.main_bot import run_bot
 from config.settings import get_settings, Settings
+
 
 async def main():
     load_dotenv()

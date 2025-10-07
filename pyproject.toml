@@ -2,6 +2,7 @@
 name = "chill-vpn-bot"
 version = "0.1.0"
 description = ""
+packages = [{include = "*"}]
 authors = ["Timofey Tsepennikov <tta@biznpro.ru>"]
 readme = "README.md"
 
