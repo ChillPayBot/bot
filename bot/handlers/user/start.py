@@ -51,7 +51,7 @@ async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery]
 
     show_trial_button_in_menu = can_user_use_trial(user_id)
 
-    text = MAIN_MENU["greeting"]
+    text = MAIN_MENU["main_menu_greeting"]
     reply_markup = get_main_menu_inline_keyboard(settings, show_trial_button_in_menu)
 
     if isinstance(target_event, types.Message):
