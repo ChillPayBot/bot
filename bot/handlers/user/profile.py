@@ -4,57 +4,51 @@ from aiogram.utils.text_decorations import html_decoration as hd
 from config.settings import Settings
 from api.user_service import UserService
 from bot.texts import PROFILE, PAYMENT_MENU
-from bot.keyboards.inline.profile_keyboards import get_profile_inline_keyboard
+from bot.keyboards.inline.profile_keyboards import get_profile_inline_keyboard, get_payment_inline_keyboard
 from .start import send_main_menu
 
 router = Router(name="user_profile_router")
 
 
-async def send_profile_menu(user_data: dict) -> str:
-    # ... (логика форматирования текста как в прошлом примере)
-    # Предполагаем, что user_data содержит все нужные поля
+# Страница профиля
+async def send_profile_menu(callback: types.CallbackQuery, user_service: UserService):
+    user_id = callback.from_user.id
+    user_data = await user_service.get_user_data(user_id)
 
-    # Пример заглушки данных для демонстрации:
     if not user_data:
-        user_data = {
-            "username": "@eastsidekillas",
-            "email": "tnmatn33@gmail.com",
-            "balance": 0.0,
-            "invited_friends": 0,
-            "active_keys": 0
-        }
+        await callback.answer(PROFILE['profile_error_data_action'], show_alert=True)
+        return
 
-    username = hd.quote(user_data.get("username") or PROFILE["not_set"])
-    email = hd.quote(user_data.get("email") or PROFILE["not_set"])
+    username = hd.quote(user_data.get("username") or PROFILE["profile_data_not_set"])
+    email = hd.quote(user_data.get("email") or PROFILE["profile_data_not_set"])
     balance = user_data.get("balance", 0.0)
     invited_friends = user_data.get("invited_friends", 0)
-    active_keys = user_data.get("active_keys", 0)
+    active_subs = user_data.get("active_subs", 0)
 
     info_block = PROFILE["profile_info"].format(
         username=username,
         email=email,
         balance=f"{balance:,.2f}".replace(",", " "),
         invited_friends=invited_friends,
-        active_keys=active_keys
+        active_subs=active_subs
     )
 
-    return f"{PROFILE['profile_title']}\n\n{info_block}"
+    text = f"{PROFILE['profile_title']}\n\n{info_block}"
+    reply_markup = get_profile_inline_keyboard()
+
+    if callback.message:
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode="html"
+        )
+
+        await callback.answer()
 
 
 @router.callback_query(F.data == "main_action:profile")
-async def show_profile_handler(call: types.CallbackQuery, user_service: UserService):
-    user_data = {}  # Заглушка
-    text = await send_profile_menu(user_data)
-    reply_markup = get_profile_inline_keyboard()
-
-    if call.message:
-        await call.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-            parse_mode="MarkdownV2"
-        )
-
-    await call.answer()
+async def show_profile_handler(callback: types.CallbackQuery, user_service: UserService):
+    await send_profile_menu(callback, user_service)
 
 
 @router.callback_query(F.data.startswith("profile_action:"))
@@ -67,7 +61,7 @@ async def profile_action_callback_handler(callback: types.CallbackQuery, setting
 
     if action == "balance":
         text = PAYMENT_MENU["payment_title"] + "\n\n" + PAYMENT_MENU["payment_info"]
-        reply_markup = get_profile_inline_keyboard()
+        reply_markup = get_payment_inline_keyboard()
 
         if callback.message:
             await callback.message.edit_text(
