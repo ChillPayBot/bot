@@ -7,6 +7,7 @@ from bot.app.web.web_server import build_and_start_web_app
 
 # НОВЫЙ ИМПОРТ: Ваш сервис для работы с Django API
 from api.user_service import UserService
+from api.settings_service import SettingsService
 
 
 async def register_all_routers(dp: Dispatcher, settings: Settings):
@@ -19,6 +20,7 @@ async def run_bot(settings_param: Settings):
     # 1. Инициализация UserService
     # Здесь предполагается, что settings_param содержит URL вашего Django API
     user_service = UserService(base_url=settings_param.BASE_URL_API)
+    api_settings = SettingsService(base_url=settings_param.BASE_URL_API)
 
     dp, bot = build_dispatcher(settings_param)
 
@@ -42,6 +44,7 @@ async def run_bot(settings_param: Settings):
         # 3. Закрытие сессии aiohttp при завершении работы бота
         logging.info("🔴 Закрытие aiohttp сессии UserService...")
         await user_service.close()
+        await api_settings.close()
 
 # ПРИМЕЧАНИЕ:
 # Убедитесь, что вы добавили поле DJANGO_API_URL в ваш класс Settings

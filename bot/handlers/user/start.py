@@ -5,6 +5,7 @@ from typing import Union
 
 from config.settings import Settings
 from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
+from api.settings_service import SettingsService
 from api.user_service import UserService
 from bot.texts import MAIN_MENU
 
@@ -18,37 +19,33 @@ def can_user_use_trial(user_id: int) -> bool:
     return trial_status_memory.get(user_id, True)
 
 
-# handlers/user/start.py (Обновленный код)
-
-# ... (Существующие импорты и код) ...
-
 async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery],
                          settings: Settings,
-                         user_service: UserService,
-                         user_data: dict | None = None):
+                         user_service: UserService):
     user = target_event.from_user
 
-    # 1. Извлечение данных пользователя
-    # Поскольку user_data формируется тут же, мы можем передать данные напрямую.
-    # Если target_event — это CallbackQuery, нам нужно брать данные из event.from_user.
-
-    payload = {
+    user_payload = {
         "tg_id": user.id,
         "username": user.username,
         "first_name": user.first_name,
         "last_name": user.last_name,
         "language_code": user.language_code,
         "is_bot": user.is_bot,
-        # 'source_code' можно добавить здесь, если он извлекается из команды /start
     }
 
-    await user_service.upsert_user(
-        **payload,
-        only_if_exists=False
-    )
+    existing_user_data = await user_service.get_user_data(user.id)
+
+    if existing_user_data:
+        # Пользователь существует: обновляем его данные (например, username)
+        await user_service.patch_user(user.id, user_payload)
+
+    else:
+        # Пользователь не существует: создаем нового
+        await user_service.add_user(
+            **user_payload,
+        )
 
     user_id = user.id
-
     show_trial_button_in_menu = can_user_use_trial(user_id)
 
     text = MAIN_MENU["main_menu_greeting"]
@@ -59,9 +56,6 @@ async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery]
     elif isinstance(target_event, types.CallbackQuery) and target_event.message:
         await target_event.message.edit_text(text, reply_markup=reply_markup)
         await target_event.answer()
-    else:
-        # на всякий случай
-        print(f"Не удалось отправить меню для пользователя {user_id}")
 
 
 @router.message(CommandStart())

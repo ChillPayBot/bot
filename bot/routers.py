@@ -11,4 +11,5 @@ def build_root_router(settings: Settings) -> Router:
     # Public routers
     root.include_router(user_router_aggregate)
 
+
     return root

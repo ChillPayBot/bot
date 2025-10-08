@@ -10,25 +10,27 @@ MAIN_MENU = {
 }
 
 PROFILE = {
-    "profile_title": "👤 *Мой профиль*",
+    "profile_title": "<b>👤 Мой профиль </b>",
     "profile_info": (
-        "👥 Пользователь: `{username}`\n"
-        "💳 Email: `{email}`\n"
-        "💰 Баланс: `{balance}₽`\n"
-        "🤝 Приглашено друзей: `{invited_friends}`\n"
-        "🔑 Активных ключей: `{active_keys}`"
+        "👥 Пользователь: @{username}\n"
+        "💳 Email: {email}\n"
+        "💰 Баланс: {balance}₽\n"
+        "🤝 Приглашено друзей: {invited_friends}\n"
+        "🔑 Активных подписок: {active_subs}"
     ),
 
     "profile_my_balance_button": "💰 Мой баланс",
-    "profile_my_keys_button": "🔑 Мои ключи",
+    "profile_my_keys_button": "🔑 Мои подписки",
     "profile_activate_promocode_button": "🎁 Активировать промокод",
 
     "back_to_main_menu_button": "⬅️ Назад",
     "profile_unknown_action": "Неизвестное действие.",
+    "profile_error_data_action": "Не удалось загрузить данные профиля. Попробуйте снова.",
+    "profile_data_not_set": "Данные отсутствуют",
 }
 
 PAYMENT_MENU = {
-    "payment_title": "💳 *Управление платежами*",
+    "payment_title": "<b>💳 Управление платежами </b>",
     "payment_info": (
         "Здесь вы можете:\n\n"
         "• 💰 Пополнить баланс - внести средства на счёт\n"
