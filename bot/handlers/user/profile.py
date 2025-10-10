@@ -4,8 +4,8 @@ from aiogram.utils.text_decorations import html_decoration as hd
 from config.settings import Settings
 from api.user_service import UserService
 from bot.texts import PROFILE, PAYMENT_MENU
-from bot.keyboards.inline.profile_keyboards import get_profile_inline_keyboard, get_payment_inline_keyboard
-from .start import send_main_menu
+from bot.keyboards.inline.profile_keyboards import get_profile_inline_keyboard
+from bot.keyboards.inline.payment_keyboards import get_payment_inline_keyboard
 
 router = Router(name="user_profile_router")
 
@@ -46,11 +46,6 @@ async def send_profile_menu(callback: types.CallbackQuery, user_service: UserSer
         await callback.answer()
 
 
-@router.callback_query(F.data == "main_action:profile")
-async def show_profile_handler(callback: types.CallbackQuery, user_service: UserService):
-    await send_profile_menu(callback, user_service)
-
-
 @router.callback_query(F.data.startswith("profile_action:"))
 async def profile_action_callback_handler(callback: types.CallbackQuery, settings: Settings, user_service: UserService):
     action = callback.data.split(":")[-1]
@@ -78,6 +73,8 @@ async def profile_action_callback_handler(callback: types.CallbackQuery, setting
         await callback.answer("Введите промокод:", show_alert=True)
 
     elif action == "back_to_main":
+        from .start import send_main_menu
+
         await send_main_menu(callback, settings, user_service)
 
     else:

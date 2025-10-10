@@ -7,6 +7,26 @@ MAIN_MENU = {
     "menu_apply_promo_button": "🤝 Пригласить друзей",
     "menu_support_button": "🆘 Не работает VPN?",
     "main_menu_unknown_action": "Неизвестное действие.",
+
+    "cancel_button": "❌ Отмена",
+    "trial_confirm_activate_button": "✅ Активировать", # Добавлено для клавиатуры
+}
+
+TRIAL = {
+    "trial_confirmation_text": (
+        "Вы собираетесь активировать бесплатный пробный период.\n\n"
+        "⏳ <b>Срок действия:</b> 3 дня\n\n"
+        "Вы получите полный доступ ко всем возможностям VPN. Продолжить?"
+    ),
+    "trial_success_message": (
+        "✅ <b>Бесплатная подписка успешно активирована!</b>\n\n"
+        "⏱️ <b>Срок действия:</b> {duration} дней\n\n"
+        "📝 <b>Данные для подключения:</b>\n"
+        "Ссылка для подключения:\n"
+        "`{connection_link}`"  # Используем ` ` для моноширинного шрифта, чтобы ссылку было легко скопировать
+    ),
+    "trial_howto_connect_button": "📖 Как подключить VPN",
+    "trial_back_to_menu_button": "⬅️ Вернуться в меню",
 }
 
 PROFILE = {
@@ -29,6 +49,7 @@ PROFILE = {
     "profile_data_not_set": "Данные отсутствуют",
 }
 
+
 PAYMENT_MENU = {
     "payment_title": "<b>💳 Управление платежами </b>",
     "payment_info": (
@@ -46,6 +67,22 @@ PAYMENT_MENU = {
     "payment_methods_button": "⚙️ Методы оплаты",
     "payment_change_email_button": "📨 Изменить email",
 
+
+    "payment_choice_rub_button": "💳 Рубли",
+    "payment_choice_crypt_button": "💲Криптовалюта",
+
+    "payment_balance_pay_button": "💳 Оплатить",
+
+
     "back_to_main_menu_button": "⬅️ Назад",
     "payment_unknown_action": "Неизвестное действие.",
+}
+
+PROVIDER_BUTTON = {
+    "YOOKASSA": "💳 ЮКасса: быстрая оплата",
+    "YOOMONEY": "💳 ЮМани: перевод по карте",
+    "FREEKASSA": "💰 FreeKassa: межд. платежи",
+    "CRYPTOBOT": "💰 CryptoBot: криптовалюта",
+    "STARS": "⭐ Оплата Звездами",
+    "ROBOKASSA": "⭐ RoboKassa"
 }

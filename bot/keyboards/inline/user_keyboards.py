@@ -1,7 +1,7 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from aiogram.types import InlineKeyboardMarkup
 from config.settings import Settings
-from bot.texts import MAIN_MENU
+from bot.texts import MAIN_MENU, TRIAL
 
 
 def get_main_menu_inline_keyboard(settings: Settings, show_trial_button: bool = False) -> InlineKeyboardMarkup:
@@ -25,4 +25,36 @@ def get_main_menu_inline_keyboard(settings: Settings, show_trial_button: bool = 
     builder.add(*buttons)
     builder.adjust(1, 2, 1)
 
+    return builder.as_markup()
+
+
+def get_trial_confirmation_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text=MAIN_MENU["trial_confirm_activate_button"],
+            callback_data="trial:confirm"
+        ),
+        InlineKeyboardButton(
+            text=MAIN_MENU["cancel_button"],
+            callback_data="back_to_main"
+        )
+    )
+    return builder.as_markup()
+
+
+def get_trial_success_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text=TRIAL["trial_howto_connect_button"],
+            callback_data="show_connection_guide"
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text=TRIAL["trial_back_to_menu_button"],
+            callback_data="back_to_main"
+        )
+    )
     return builder.as_markup()
