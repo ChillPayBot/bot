@@ -1,55 +1,47 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.utils.text_decorations import html_decoration as hd
 from typing import Union
-
-from config.settings import Settings
-from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
-from api.settings_service import SettingsService
-from api.user_service import UserService
 from bot.texts import MAIN_MENU
 
+from config.settings import Settings
+from api.settings_service import SettingsService
+from api.user_service import UserService
+
+from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
+
 router = Router(name="user_start_router")
-
-# Временно хранение статуса пробного периода
-trial_status_memory: dict[int, bool] = {}
-
-
-def can_user_use_trial(user_id: int) -> bool:
-    return trial_status_memory.get(user_id, True)
 
 
 async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery],
                          settings: Settings,
                          user_service: UserService):
     user = target_event.from_user
+    user_data = await user_service.get_user_data(user.id)
 
-    user_payload = {
-        "tg_id": user.id,
-        "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "language_code": user.language_code,
-        "is_bot": user.is_bot,
-    }
-
-    existing_user_data = await user_service.get_user_data(user.id)
-
-    if existing_user_data:
-        # Пользователь существует: обновляем его данные (например, username)
-        await user_service.patch_user(user.id, user_payload)
-
-    else:
-        # Пользователь не существует: создаем нового
-        await user_service.add_user(
-            **user_payload,
+    if not user_data:
+        user_data = await user_service.add_user(
+            user_id=user.id,
+            username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            language_code=user.language_code
         )
+    else:
+        await user_service.patch_user(user.id, {
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        })
 
-    user_id = user.id
-    show_trial_button_in_menu = can_user_use_trial(user_id)
+    if not user_data:
+        await target_event.answer("Ошибка при создании профиля. Попробуйте позже.")
+        return
+
+    show_trial_button = not user_data.get('trial_used', True)
 
     text = MAIN_MENU["main_menu_greeting"]
-    reply_markup = get_main_menu_inline_keyboard(settings, show_trial_button_in_menu)
+    reply_markup = get_main_menu_inline_keyboard(settings, show_trial_button)
 
     if isinstance(target_event, types.Message):
         await target_event.answer(text, reply_markup=reply_markup)
@@ -61,3 +53,33 @@ async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery]
 @router.message(CommandStart())
 async def start_command_handler(message: types.Message, settings: Settings, user_service: UserService):
     await send_main_menu(message, settings, user_service)
+
+
+@router.callback_query(F.data.startswith("main_action:"))
+async def profile_action_callback_handler(callback: types.CallbackQuery, settings: Settings, user_service: UserService):
+    action = callback.data.split(":")[-1]
+
+    if not callback.message:
+        await callback.answer("Error message context lost.", show_alert=True)
+        return
+
+    if action == "profile":
+        from .profile import send_profile_menu
+
+        await send_profile_menu(callback, user_service)
+    elif action == "request_trial":
+        from .trial import request_trial_handler
+
+        await request_trial_handler(callback)
+
+    elif action == "keys":
+        await callback.answer("Переход в раздел: Мои ключи", show_alert=True)
+
+    elif action == "promo":
+        await callback.answer("Введите промокод:", show_alert=True)
+
+    elif action == "back_to_main":
+        await send_main_menu(callback, settings, user_service)
+
+    else:
+        await callback.answer(MAIN_MENU["main_menu_unknown_action"], show_alert=True)

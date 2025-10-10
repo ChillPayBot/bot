@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     WEBHOOK_BASE_URL: Optional[str] = None
     BASE_URL_API: Optional[str] = None
+    BASE_API_TOKEN: Optional[str] = None
     WEB_SERVER_HOST: str = Field(default="0.0.0.0")
     WEB_SERVER_PORT: int = Field(default=8080)
 
