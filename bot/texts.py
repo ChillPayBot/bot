@@ -9,8 +9,29 @@ MAIN_MENU = {
     "main_menu_unknown_action": "Неизвестное действие.",
 
     "cancel_button": "❌ Отмена",
-    "trial_confirm_activate_button": "✅ Активировать", # Добавлено для клавиатуры
+    "trial_confirm_activate_button": "✅ Активировать",
 }
+
+TARIFFS = {
+    # ... (существующие тексты) ...
+    "choose_tariff_message": "<b>Выберите подходящий тариф:</b>",
+    "no_tariffs_available": "К сожалению, сейчас нет доступных тарифов. Попробуйте позже.",
+    "error_loading_tariffs": "Произошла ошибка при загрузке тарифов. Пожалуйста, попробуйте еще раз.",
+    "back_to_menu_button": "⬅️ Назад в меню",
+
+    "tariff_description_quote": (
+        "✨ <b>{name}</b> ({price}₽/мес)\n"
+        "-------------------------------------\n"
+        "🚀 <b>Скорость:</b> Без ограничений\n"
+        "🌐 <b>Трафик:</b> {traffic_limit}\n"
+        "💻 <b>Лимит устройств:</b> {devices_limit}\n\n"
+        "⚡️ {benefit_line_1}\n"
+        "💎 {benefit_line_2}"
+    ),
+
+    "tariff_select_button": "{name} — {price}₽/мес"
+}
+
 
 TRIAL = {
     "trial_confirmation_text": (

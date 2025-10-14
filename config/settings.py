@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     CAPTCHA_ENABLE: bool = Field(default=False)
 
     WEBHOOK_BASE_URL: Optional[str] = None
-    BASE_URL_API: Optional[str] = None
-    BASE_API_TOKEN: Optional[str] = None
+    API_BASE_URL: Optional[str] = None
+    API_TOKEN: Optional[str] = None
     WEB_SERVER_HOST: str = Field(default="0.0.0.0")
     WEB_SERVER_PORT: int = Field(default=8080)
 

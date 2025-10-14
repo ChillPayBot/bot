@@ -1,6 +1,9 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from aiogram.types import InlineKeyboardMarkup
 from config.settings import Settings
+from typing import Optional, Dict, Any, List
+
+
 from bot.texts import MAIN_MENU, TRIAL
 
 
@@ -25,6 +28,24 @@ def get_main_menu_inline_keyboard(settings: Settings, show_trial_button: bool = 
     builder.add(*buttons)
     builder.adjust(1, 2, 1)
 
+    return builder.as_markup()
+
+
+def get_tariffs_keyboard(tariffs: List[Dict[str, Any]]) -> InlineKeyboardMarkup:
+    """Генерирует инлайн-клавиатуру для выбора тарифа."""
+    builder = InlineKeyboardBuilder()
+
+    for tariff in tariffs:
+        # Формируем текст кнопки: Название (Цена/месяц)
+        text = f"{tariff['name']} ({tariff['price_per_month']}₽/мес)"
+
+        # Callback-данные для покупки: tariff:select:{slug}
+        callback_data = f"tariff:select:{tariff['slug']}"
+
+        builder.row(InlineKeyboardButton(text=text, callback_data=callback_data))
+
+    # Регулируем по одной кнопке в ряд
+    builder.adjust(1)
     return builder.as_markup()
 
 

@@ -6,21 +6,13 @@ logger = logging.getLogger(__name__)
 
 
 class UserService:
-    def __init__(self, base_url: str, api_token: str):
+
+    def __init__(self, base_url: str, session: aiohttp.ClientSession):
         self.base_url = base_url.rstrip('/')
-
-        self.headers = {
-            "Authorization": f"Token {api_token}",
-            "Content-Type": "application/json"
-        }
-
-        self.session = aiohttp.ClientSession(headers=self.headers)
-        logger.info(f"UserService инициализирован")
-
-    async def close(self):
-        await self.session.close()
+        self.session = session
 
     async def get_user_data(self, tg_id: int) -> Optional[Dict[str, Any]]:
+        """Получает данные пользователя по его Telegram ID. GET /users/{tg_id}/"""
 
         url = f"{self.base_url}/users/{tg_id}/"
         try:
@@ -43,35 +35,12 @@ class UserService:
             logger.error(f"Ошибка подключения к API {url}: {e}")
             return None
 
-    async def activate_trial(self, tg_id: int) -> Optional[Dict[str, Any]]:
-        """Активирует пробный период для пользователя."""
-        url = f"{self.base_url}/users/{tg_id}/activate_trial/"
-        try:
-            async with self.session.post(url) as response:
-                if response.status == 200:
-                    logger.info(f"Триал для {tg_id} успешно активирован.")
-                    return await response.json()
-                elif response.status == 409: # Конфликт - триал уже использован
-                    logger.warning(f"Попытка повторной активации триала для {tg_id}.")
-                    error_detail = await response.json()
-                    return {"error": error_detail.get("detail")}
-                else:
-                    logger.error(f"Ошибка API при активации триала для {tg_id}. Статус: {response.status}")
-                    return None
-        except aiohttp.ClientConnectorError as e:
-            logger.error(f"Ошибка подключения к API {url}: {e}")
-            return None
 
 
-    # --- 2. ADD_USER (POST) ---
-    async def add_user(
-            self,
-            user_id: int,
-            username: Optional[str] = None,
-            first_name: Optional[str] = None,
-            last_name: Optional[str] = None,
-            language_code: Optional[str] = None,
-    ) -> Optional[Dict[str, Any]]:
+    async def add_user(self, user_id: int, username: Optional[str] = None,
+                       first_name: Optional[str] = None, last_name: Optional[str] = None,
+                       language_code: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Создает нового пользователя. POST /users/"""
 
         url = f"{self.base_url}/users/"
         payload = {
@@ -84,23 +53,23 @@ class UserService:
         payload = {k: v for k, v in payload.items() if v is not None}
 
         try:
-            # Заголовки автоматически используются
             async with self.session.post(url, json=payload) as response:
                 if response.status == 201:
                     logger.info(f"Новый пользователь {user_id} успешно создан (201).")
                     return await response.json()
                 elif response.status == 400:
-                    # ... (логика конфликта и ошибок) ...
                     error_detail = await response.json()
-                    if 'user_id' in error_detail and 'already exists' in str(error_detail['user_id']):
-                        logger.warning(f"Пользователь {user_id} уже существует (400 Conflict).")
+                    # Если получаем ошибку 400, это может быть конфликт (пользователь уже есть)
+                    # или ошибка валидации
+                    if 'user_id' in error_detail:  # Проверяем, связано ли с конфликтом PK
+                        logger.warning(f"Пользователь {user_id} уже существует или ошибка PK (400).")
                         return {"user_id": user_id, "message": "User already exists (via add_user)."}
 
-                    logger.error(
-                        f"Ошибка API при add_user {user_id}. Статус: 400. Детали: {error_detail}"
-                    )
+                    logger.error(f"Ошибка API при add_user {user_id}. Статус: 400. Детали: {error_detail}")
                     return None
-                # ... (другие статусы) ...
+                else:
+                    logger.error(f"Ошибка API при add_user {user_id}. Статус: {response.status}")
+                    return None
 
         except aiohttp.ClientConnectorError as e:
             logger.error(f"Ошибка подключения к API {url}: {e}")
@@ -112,23 +81,24 @@ class UserService:
             user_id: int,
             payload: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
-        """
-        Обновляет только переданные поля существующего пользователя.
-        PATCH /api/v1/users/{user_id}/
-        """
+        """Обновляет только переданные поля существующего пользователя. PATCH /users/{user_id}/"""
+
         url = f"{self.base_url}/users/{user_id}/"
 
         clean_payload = {k: v for k, v in payload.items() if v is not None}
         if not clean_payload: return None
 
         try:
-            # Заголовки автоматически используются
             async with self.session.patch(url, json=clean_payload) as response:
                 if response.status == 200:
                     logger.info(f"Пользователь {user_id} успешно обновлен (200).")
                     return await response.json()
-                # ... (логика ошибок) ...
-                # ...
+                elif response.status == 404:
+                    logger.warning(f"Пользователь {user_id} не найден для PATCH.")
+                    return None
+                else:
+                    logger.error(f"Ошибка API при patch_user {user_id}. Статус: {response.status}")
+                    return None
         except aiohttp.ClientConnectorError as e:
             logger.error(f"Ошибка подключения к API {url}: {e}")
             return None

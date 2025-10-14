@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
 from config.settings import Settings
 from api.user_service import UserService
+from api.subscription_service import SubscriptionAPIService
 from .start import send_main_menu
 from bot.keyboards.inline.user_keyboards import  get_trial_confirmation_keyboard, get_trial_success_keyboard
 from bot.texts import TRIAL
@@ -20,11 +21,11 @@ async def request_trial_handler(callback: types.CallbackQuery):
 
 
 @router.callback_query(F.data == "trial:confirm")
-async def confirm_trial_handler(callback: types.CallbackQuery, user_service: UserService, settings: Settings):
+async def confirm_trial_handler(callback: types.CallbackQuery, user_service: UserService, sub_api_service: SubscriptionAPIService, settings: Settings):
     user_telegram_id = callback.from_user.id
     await callback.answer("Активируем пробный период...")
 
-    response = await user_service.activate_trial(user_telegram_id)
+    response = await sub_api_service.activate_trial(user_telegram_id)
 
     if response and not response.get("error"):
 
@@ -48,8 +49,8 @@ async def confirm_trial_handler(callback: types.CallbackQuery, user_service: Use
             await callback.answer("Ошибка: сервер не предоставил ссылку для подключения.", show_alert=True)
             await send_main_menu(callback, settings, user_service)
 
-    elif response and response.get("detail"):
-        error_message = response["detail"]
+    elif response and response.get("error"):
+        error_message = response["error"]
         logger.warning(f"Trial activation failed for {user_telegram_id}. Error: {error_message}")
         await callback.answer(error_message, show_alert=True)
         await send_main_menu(callback, settings, user_service)

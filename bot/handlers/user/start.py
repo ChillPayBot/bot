@@ -7,6 +7,7 @@ from bot.texts import MAIN_MENU
 from config.settings import Settings
 from api.settings_service import SettingsService
 from api.user_service import UserService
+from api.tariff_service import TariffAPIService
 
 from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
 
@@ -56,7 +57,7 @@ async def start_command_handler(message: types.Message, settings: Settings, user
 
 
 @router.callback_query(F.data.startswith("main_action:"))
-async def profile_action_callback_handler(callback: types.CallbackQuery, settings: Settings, user_service: UserService):
+async def profile_action_callback_handler(callback: types.CallbackQuery, settings: Settings, user_service: UserService, tariff_service: TariffAPIService):
     action = callback.data.split(":")[-1]
 
     if not callback.message:
@@ -72,8 +73,9 @@ async def profile_action_callback_handler(callback: types.CallbackQuery, setting
 
         await request_trial_handler(callback)
 
-    elif action == "keys":
-        await callback.answer("Переход в раздел: Мои ключи", show_alert=True)
+    elif action == "buy_subscription":
+        from .tariffs import send_tariffs_menu
+        await send_tariffs_menu(callback, settings, user_service, tariff_service)
 
     elif action == "promo":
         await callback.answer("Введите промокод:", show_alert=True)
