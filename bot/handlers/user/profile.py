@@ -4,6 +4,7 @@ from aiogram.utils.text_decorations import html_decoration as hd
 from config.settings import Settings
 from api.user_service import UserService
 from bot.texts import PROFILE, PAYMENT_MENU
+from bot.utils.messages import edit_or_send_message
 from bot.keyboards.inline.profile_keyboards import get_profile_inline_keyboard
 from bot.keyboards.inline.payment_keyboards import get_payment_inline_keyboard
 
@@ -36,14 +37,12 @@ async def send_profile_menu(callback: types.CallbackQuery, user_service: UserSer
     text = f"{PROFILE['profile_title']}\n\n{info_block}"
     reply_markup = get_profile_inline_keyboard()
 
-    if callback.message:
-        await callback.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-            parse_mode="html"
-        )
-
-        await callback.answer()
+    await edit_or_send_message(
+        target_event=callback,
+        text=text,
+        reply_markup=reply_markup,
+        media_path=None
+    )
 
 
 @router.callback_query(F.data.startswith("profile_action:"))
@@ -58,13 +57,12 @@ async def profile_action_callback_handler(callback: types.CallbackQuery, setting
         text = PAYMENT_MENU["payment_title"] + "\n\n" + PAYMENT_MENU["payment_info"]
         reply_markup = get_payment_inline_keyboard()
 
-        if callback.message:
-            await callback.message.edit_text(
-                text=text,
-                reply_markup=reply_markup,
-                parse_mode="html"
-            )
-            await callback.answer()
+        await edit_or_send_message(
+            target_event=callback,
+            text=text,
+            reply_markup=reply_markup,
+            media_path=None
+        )
 
     elif action == "keys":
         await callback.answer("Переход в раздел: Мои ключи", show_alert=True)
