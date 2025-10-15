@@ -2,41 +2,68 @@ MAIN_MENU = {
     "main_menu_greeting": "👋 Добро пожаловать в главное меню!\n\n🚀 Обходите блокировки, получайте доступ к любимому контенту и наслаждайтесь быстрой скоростью соединения.\n\n📖️ Выберите действие:",
     "menu_activate_trial_button": "🆓 Пробный период",
     "menu_subscribe_inline": "🌐 Купить VPN",
-    "menu_my_profile_inline": "👤 Мой профиль",
-    "menu_how_to_connect_button": "📖 Как подключить VPN",
+    "menu_my_sub_inline": "👤 Моя подписка",
     "menu_apply_promo_button": "🤝 Пригласить друзей",
-    "menu_support_button": "🆘 Не работает VPN?",
-    "main_menu_unknown_action": "Неизвестное действие.",
 
+    "main_menu_unknown_action": "Неизвестное действие.",
+}
+
+
+HELP = {
+    "how_to_connect_button": "📖 Как подключить?",
+    "not_work_vpn_button": "🆘 Не работает VPN?",
+}
+
+BUTTONS_TYPES = {
+    "back_to_main_menu_button": "⬅️ Назад в главное меню",
+    "activate_button": "✅ Активировать",
+    "disable_button": "❌ Выключить",
     "cancel_button": "❌ Отмена",
-    "trial_confirm_activate_button": "✅ Активировать",
+}
+
+
+SUBSCRIPTION_MENU = {
+    "sub_title": "🌟 <b>Мои активные подписки</b>",
+    "no_active_subs": "У вас нет активных подписок. Выберите тариф, чтобы начать пользоваться VPN.",
+    "subscription_block_template": (
+        "🔗 <b>Текущий тариф: {tariff_display_name}</b> 🔗\n\n"
+        "   <b>Действует до: {expires_at} </b> \n"
+        "   <b>Ссылка подписки: {subscription_link} </b> \n"
+    ),
+    "traffic_unlimited": "Безлимитный",
+    "traffic_remaining": "{remaining_traffic} / {total_traffic}",
+
+
+}
+
+TARIFF_ICONS = {
+    "basic": "🔘",
+    "max": "🧩",
+    "pro": "⭐️",
+    "default": "🔹"
 }
 
 TARIFFS = {
-    # ... (существующие тексты) ...
-    "choose_tariff_message": "<b>Выберите подходящий тариф:</b>",
-    "no_tariffs_available": "К сожалению, сейчас нет доступных тарифов. Попробуйте позже.",
-    "error_loading_tariffs": "Произошла ошибка при загрузке тарифов. Пожалуйста, попробуйте еще раз.",
-    "back_to_menu_button": "⬅️ Назад в меню",
+    "tariff_menu_header": "<b>Выберите подходящий тариф ⤵️</b>",
 
-    "tariff_description_quote": (
-        "✨ <b>{name}</b> ({price}₽/мес)\n"
-        "-------------------------------------\n"
-        "🚀 <b>Скорость:</b> Без ограничений\n"
-        "🌐 <b>Трафик:</b> {traffic_limit}\n"
-        "💻 <b>Лимит устройств:</b> {devices_limit}\n\n"
-        "⚡️ {benefit_line_1}\n"
-        "💎 {benefit_line_2}"
+
+    "tariff_header_template": "{icon} <b>{name}</b>",
+
+    "tariff_content_template": (
+        "- устройств: {devices_limit}\n"
+        "- цена: {price} ₽/мес"
     ),
 
-    "tariff_select_button": "{name} — {price}₽/мес"
+    "tariff_select_button": "{name} — {price}₽/мес",
+    "no_tariffs_available": "К сожалению, сейчас нет доступных тарифов. Попробуйте позже.",
+    "error_loading_tariffs": "Произошла ошибка при загрузке тарифов. Пожалуйста, попробуйте еще раз.",
 }
 
 
 TRIAL = {
     "trial_confirmation_text": (
         "Вы собираетесь активировать бесплатный пробный период.\n\n"
-        "⏳ <b>Срок действия:</b> 3 дня\n\n"
+        "⏳ <b>Срок действия:</b> 7 дней\n\n"
         "Вы получите полный доступ ко всем возможностям VPN. Продолжить?"
     ),
     "trial_success_message": (
@@ -44,10 +71,11 @@ TRIAL = {
         "⏱️ <b>Срок действия:</b> {duration} дней\n\n"
         "📝 <b>Данные для подключения:</b>\n"
         "Ссылка для подключения:\n"
-        "`{connection_link}`"  # Используем ` ` для моноширинного шрифта, чтобы ссылку было легко скопировать
+        "`{connection_link}`"
     ),
-    "trial_howto_connect_button": "📖 Как подключить VPN",
-    "trial_back_to_menu_button": "⬅️ Вернуться в меню",
+
+    "trial_confirm_activate_button": "✅ Активировать",
+
 }
 
 PROFILE = {

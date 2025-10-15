@@ -1,27 +1,31 @@
+import logging
 from aiogram import Router, types, F
 from config.settings import Settings
 from api.user_service import UserService
 from api.subscription_service import SubscriptionAPIService
-from .start import send_main_menu
-from bot.keyboards.inline.user_keyboards import  get_trial_confirmation_keyboard, get_trial_success_keyboard
+
 from bot.texts import TRIAL
+from bot.keyboards.inline.trial_keyboards import get_trial_confirmation_keyboard, get_trial_success_keyboard
+from bot.utils.messages import edit_or_send_message
+
+from .start import send_main_menu
+
+logger = logging.getLogger(__name__)
 
 router = Router(name="user_trial_router")
 
-TRIAL_PERIOD_DAYS = 3
-
 
 async def request_trial_handler(callback: types.CallbackQuery):
-    await callback.message.edit_text(
+    await edit_or_send_message(
+        target_event=callback,
         text=TRIAL["trial_confirmation_text"],
         reply_markup=get_trial_confirmation_keyboard(),
-        parse_mode="HTML"
     )
-    await callback.answer()
 
 
 @router.callback_query(F.data == "trial:confirm")
-async def confirm_trial_handler(callback: types.CallbackQuery, user_service: UserService, sub_api_service: SubscriptionAPIService, settings: Settings):
+async def confirm_trial_handler(callback: types.CallbackQuery, user_service: UserService,
+                                sub_api_service: SubscriptionAPIService, settings: Settings):
     user_telegram_id = callback.from_user.id
     await callback.answer("Активируем пробный период...")
 
@@ -29,20 +33,20 @@ async def confirm_trial_handler(callback: types.CallbackQuery, user_service: Use
 
     if response and not response.get("error"):
 
-        connection_link = response.get("subscription_link")
+        connection_link = response.get("subscriptionUrl")
         trial_duration = response.get("trial_days")
 
         if connection_link and trial_duration is not None:
-            # 3. Формируем текст успеха
+
             success_text = TRIAL["trial_success_message"].format(
                 duration=trial_duration,
                 connection_link=connection_link
             )
 
-            await callback.message.edit_text(
+            await edit_or_send_message(
+                target_event=callback,
                 text=success_text,
                 reply_markup=get_trial_success_keyboard(),
-                parse_mode="HTML"
             )
         else:
             logger.error(f"API returned success but missing link/duration. Response: {response}")
@@ -56,6 +60,5 @@ async def confirm_trial_handler(callback: types.CallbackQuery, user_service: Use
         await send_main_menu(callback, settings, user_service)
 
     else:
-        # Непредвиденная ошибка
         await callback.answer("Не удалось активировать пробный период. Попробуйте позже.", show_alert=True)
         await send_main_menu(callback, settings, user_service)

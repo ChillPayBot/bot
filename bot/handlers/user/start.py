@@ -1,23 +1,29 @@
+from pathlib import Path
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.utils.text_decorations import html_decoration as hd
+from aiogram.types import FSInputFile
 from typing import Union
-from bot.texts import MAIN_MENU
 
 from config.settings import Settings
+from bot.texts import MAIN_MENU
+from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
+from bot.utils.messages import edit_or_send_message
+
 from api.settings_service import SettingsService
 from api.user_service import UserService
 from api.tariff_service import TariffAPIService
 
-from bot.keyboards.inline.user_keyboards import get_main_menu_inline_keyboard
 
 router = Router(name="user_start_router")
 
+IMAGE_PATH = Path('img') / 'menu.jpg'
 
-async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery],
+
+async def send_main_menu(callback: types.CallbackQuery,
                          settings: Settings,
                          user_service: UserService):
-    user = target_event.from_user
+    user = callback.from_user
     user_data = await user_service.get_user_data(user.id)
 
     if not user_data:
@@ -36,19 +42,20 @@ async def send_main_menu(target_event: Union[types.Message, types.CallbackQuery]
         })
 
     if not user_data:
-        await target_event.answer("Ошибка при создании профиля. Попробуйте позже.")
+        await callback.answer("Ошибка при создании профиля. Попробуйте позже.")
         return
 
     show_trial_button = not user_data.get('trial_used', True)
 
     text = MAIN_MENU["main_menu_greeting"]
-    reply_markup = get_main_menu_inline_keyboard(settings, show_trial_button)
+    main_keyboard = get_main_menu_inline_keyboard(settings, show_trial_button)
 
-    if isinstance(target_event, types.Message):
-        await target_event.answer(text, reply_markup=reply_markup)
-    elif isinstance(target_event, types.CallbackQuery) and target_event.message:
-        await target_event.message.edit_text(text, reply_markup=reply_markup)
-        await target_event.answer()
+    await edit_or_send_message(
+        target_event=callback,
+        text=text,
+        reply_markup=main_keyboard,
+        media_path=IMAGE_PATH
+    )
 
 
 @router.message(CommandStart())
@@ -64,13 +71,12 @@ async def profile_action_callback_handler(callback: types.CallbackQuery, setting
         await callback.answer("Error message context lost.", show_alert=True)
         return
 
-    if action == "profile":
-        from .profile import send_profile_menu
+    if action == "sub":
+        from .subscription import send_user_subscription_menu
+        await send_user_subscription_menu(callback, user_service)
 
-        await send_profile_menu(callback, user_service)
     elif action == "request_trial":
         from .trial import request_trial_handler
-
         await request_trial_handler(callback)
 
     elif action == "buy_subscription":

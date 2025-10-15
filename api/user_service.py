@@ -35,7 +35,28 @@ class UserService:
             logger.error(f"Ошибка подключения к API {url}: {e}")
             return None
 
+    async def get_current_subscription(self, tg_id: int) -> Optional[Dict[str, Any]]:
+        """Получает активную подписку пользователя по его Telegram ID. GET /subscriptions/{tg_id}/current/"""
 
+        url = f"{self.base_url}/subscriptions/{tg_id}/current/"
+        try:
+            async with self.session.get(url) as response:
+                if response.status == 200:
+                    # Найдена активная подписка
+                    return await response.json()
+                elif response.status == 404:
+                    # Подписка не найдена (нет активной)
+                    return None
+                else:
+                    error_detail = await response.json()
+                    logger.error(
+                        f"Ошибка API при GET текущей подписки для {tg_id}. Статус: {response.status}. "
+                        f"Детали: {error_detail}"
+                    )
+                    return None
+        except aiohttp.ClientConnectorError as e:
+            logger.error(f"Ошибка подключения к API {url}: {e}")
+            return None
 
     async def add_user(self, user_id: int, username: Optional[str] = None,
                        first_name: Optional[str] = None, last_name: Optional[str] = None,
