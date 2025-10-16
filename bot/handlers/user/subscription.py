@@ -27,6 +27,9 @@ async def send_user_subscription_menu(callback: types.CallbackQuery, user_servic
 
     text_parts = [SUBSCRIPTION_MENU["sub_title"]]
 
+    # 💡 ИСПРАВЛЕНИЕ: Инициализация переменной здесь
+    subscription_link_to_button = None
+
     if current_sub is None:
         text_parts.append(SUBSCRIPTION_MENU["no_active_subs"])
 
@@ -34,7 +37,7 @@ async def send_user_subscription_menu(callback: types.CallbackQuery, user_servic
         is_trial = current_sub.get('trial_used', False)
 
         if is_trial:
-            tariff_display_name = "Пробный период"
+            tariff_display_name = "Пробный период (Trial)"
         else:
             tariff_display_name = current_sub.get('tariff_name', 'Неизвестный тариф')
 
@@ -45,6 +48,7 @@ async def send_user_subscription_menu(callback: types.CallbackQuery, user_servic
         else:
             expires_at = "Бессрочно"
 
+        # 1. Извлекаем ссылку
         subscription_link_to_text = current_sub.get('subscriptionUrl', 'Недоступна')
 
         # 2. Сохраняем ссылку для кнопки (если она есть)
@@ -60,6 +64,8 @@ async def send_user_subscription_menu(callback: types.CallbackQuery, user_servic
         text_parts.append(f"<blockquote>{sub_block}</blockquote>")
 
     final_text = "\n\n".join(text_parts)
+
+    # Переменная теперь всегда существует и равна None, если подписки нет.
     reply_markup = get_subscription_menu_keyboard(subscription_link=subscription_link_to_button)
 
     await edit_or_send_message(
