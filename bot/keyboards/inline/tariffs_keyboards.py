@@ -2,7 +2,7 @@ from typing import Optional, Dict, Any, List
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from aiogram.types import InlineKeyboardMarkup
 
-from bot.texts import TARIFF_ICONS
+from bot.texts import TARIFF_ICONS, BUTTONS_TYPES
 
 
 def get_tariffs_keyboard(tariffs: List[Dict[str, Any]]) -> InlineKeyboardMarkup:
@@ -11,12 +11,17 @@ def get_tariffs_keyboard(tariffs: List[Dict[str, Any]]) -> InlineKeyboardMarkup:
 
     for tariff in tariffs:
         icon = TARIFF_ICONS.get(tariff['slug'], TARIFF_ICONS['default'])
-
         text = f"{icon} {tariff['name']}"
-
         callback_data = f"tariff:select:{tariff['slug']}"
 
-        builder.row(InlineKeyboardButton(text=text, callback_data=callback_data))
+        builder.add(InlineKeyboardButton(text=text, callback_data=callback_data))
+
+    builder.add(
+        InlineKeyboardButton(
+            text=BUTTONS_TYPES["back_to_main_menu_button"],
+            callback_data="tariff_action:back_to_main"
+        )
+    )
 
     builder.adjust(1)
     return builder.as_markup()

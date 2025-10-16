@@ -84,8 +84,19 @@ async def handle_buy_subscription(
     """Обрабатывает нажатие на кнопку 'Купить подписку'."""
     await send_tariffs_menu(callback, settings, user_service, tariff_service)
 
-# TODO: Добавить хендлер для обработки выбора тарифа:
-# @router.callback_query(F.data.startswith("tariff:select:"))
-# async def handle_tariff_selection(...):
-#     tariff_slug = callback.data.split(":")[-1]
-#     # ... логика выбора продолжительности и оплаты ...
+
+@router.callback_query(F.data.startswith("tariff_action:"))
+async def tariffs_action_callback_handler(callback: types.CallbackQuery, settings: Settings, user_service: UserService):
+    action = callback.data.split(":")[-1]
+
+    if not callback.message:
+        await callback.answer("Error message context lost.", show_alert=True)
+        return
+
+    if action == "back_to_main":
+        from .start import send_main_menu
+
+        await send_main_menu(callback, settings, user_service)
+
+    else:
+        await callback.answer(PROFILE["profile_unknown_action"], show_alert=True)
